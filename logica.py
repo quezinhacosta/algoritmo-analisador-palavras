@@ -98,6 +98,7 @@ while True:
     print("3 - excluir palavra")
     print("4 -  encontrar uma palavra")
     print("5 - sair")
+    print("oh ")
     print("6 - mudar de derivada para original")
     print("7 - mudar de original para derivada")
 
