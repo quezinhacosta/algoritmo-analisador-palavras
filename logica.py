@@ -50,32 +50,55 @@ def analisar_palavra(palavra):
     return tipo, palavra_original, derivada
 
 
-def complexidade_silabica(palavra,maior_n_silaba):
+def complexidade_silabica(palavra):
     #CS = NÚMERO DE SÍLABAS DA PALAVRA / MAIOR NÚMERO DE SÍLABAS NO CONJUNTO DE PALAVRAS ANALISADO
-    cs = Numero_de_silabas.palavra / maior_n_silaba
-    if Numero_de_silabas.palavra > maior_n_silaba:
-        maior_n_silaba = numero_de_silabas
-    return cs
+   palavra = palavra.lower()
+   if df.empty:
+        return 0;
+   linha = df[df["Palavra"].str.lower() == palavra]
+   silaba_palavra = linha["Silabas"].values[0]
+   maior_n_silaba = df["Slabas"].max()
+   if maior_n_silaba == 0:
+        return 0
+   CS = silaba_palavra / maior_n_silaba
 
-def complexidade_fonologica(palavra,maior_n_fonemas):
-    #CF = NÚMERO DE FONEMAS / MAIOR NÚMERO DE FONEMAS OBSERVADOS NO CONJUNTO DE PALAVRAS
-    cs = fonemas.palavra / maior_n_fonemas
-    return cf
+   return CS
+
+def complexidade_fonologica(palavra):
+    #CF = NÚMERO DE FONEMAS / MAIOR NÚMERO DE FONEMAS OBSERVADOS NO CONJUNTO DE PALAVRA
+    palavra = palavra.lower()
+    if df.empty:
+        return 0;
+    linha = df[df["Palavra"].str.lower() == palavra]
+    fonema_palavra = linha["Fonema"].values[0]
+    maior_n_fonema = df["Fonema"].max()
+    if maior_n_fonema == 0:
+        return 0
+    CF = fonema_palavra / maior_n_fonema
+
+    return CF
+
 
 def similaridade_ortografica(palavra, n_derivadas):
     #SO = NÚMERO DE PALAVRAS SEMELHANTES NO CONJUNTO DE PALAVRAS / MAIOR NÚMERO ENCONTRADO DE PALAVRAS SEMELHANTES NO CONJUNTO DE PALAVRAS
-    
+    palavra = palavra.lower()
+    if df.empty:
+        return 0;
 
-def frequencia_de_uso(palavra, frequencia_max):
+
+def frequencia_de_uso(palavra):
     #F = FREQUÊNCIA PALAVRA (CORPUS BRASILEIRO) / (CORPUS BRASILEIRO) FREQUENCIA MAXIMA PRESENTE NA BASE DE PALAVRAS
+    palavra = palavra.lower()
     if df.empty:
         return 0
+    linha = df[df["Palavra"].str.lower() == palavra]
+    freq_palavra = linha["Frequência"].values[0]
     frequencia_max = df["Frequência"].max()
-    linha = df[df["Palavra"].str.lower() == palavra.lower()]
-    f = palavra.frequencia / frequencia_max
-    if palavra.frequencia > frequencia_max:
-        palavra.frequencia = frequencia_max
-    return f
+    if frequencia_max == 0:
+        return 0
+    F = freq_palavra / frequencia_max
+
+    return F
 
 def encontrar_derivada(palavra): 
     doc_novo = nlp(palavra)
