@@ -1,16 +1,18 @@
 import spacy
 import pandas as pd
 import os
+import re
+from collections import Counter
+
 
 nlp = spacy.load("pt_core_news_sm")
 BASE = os.path.dirname(os.path.abspath(__file__))
 ARQUIVO = os.path.join(BASE, "catalogo_palavras.xlsx")
-
 if os.path.exists(ARQUIVO):
     df = pd.read_excel(ARQUIVO)
-    df.columns = ["Palavra", "Tipo", "Palavra original", "Palavra derivada"]
+    df.columns = ["Palavra", "Frequência", "Numero_de_silabas", "Derivações", "Fonemas", "Nível"]
 else:
-    df = pd.DataFrame(columns=["Palavra", "Tipo", "Palavra original", "Palavra derivada"])
+    df = pd.DataFrame(columns=["Palavra", "Frequência", "Numero_de_silabas", "Derivações", "Fonemas", "Nível"])
 
 def buscar_palavra(palavra):
     resultado = df[df["Palavra"].str.lower() == palavra.lower()]
@@ -46,6 +48,96 @@ def analisar_palavra(palavra):
 
     return tipo, palavra_original, derivada
 
+
+def complexidade_silabica(palavra):
+    #CS = NÚMERO DE SÍLABAS DA PALAVRA / MAIOR NÚMERO DE SÍLABAS NO CONJUNTO DE PALAVRAS ANALISADO
+   palavra = palavra.lower()
+   if df.empty:
+        return 0
+   linha = df[df["Palavra"].str.lower() == palavra]
+   silaba_palavra = linha["Numero_de_silabas"].values[0]
+   maior_n_silaba = df["Numero_de_silabas"].max()
+   if maior_n_silaba == 0:
+        return 0
+   CS = silaba_palavra / maior_n_silaba
+
+   return CS
+
+def complexidade_fonologica(palavra):
+    #CF = NÚMERO DE FONEMAS / MAIOR NÚMERO DE FONEMAS OBSERVADOS NO CONJUNTO DE PALAVRA
+    palavra = palavra.lower()
+    if df.empty:
+        return 0
+    linha = df[df["Palavra"].str.lower() == palavra]
+    fonema_palavra = linha["Fonemas"].values[0]
+    maior_n_fonema = df["Fonemas"].max()
+    if maior_n_fonema == 0:
+        return 0
+    CF = fonema_palavra / maior_n_fonema
+
+    return CF
+
+
+def similaridade_ortografica(palavra):
+    #SO = NÚMERO DE PALAVRAS SEMELHANTES NO CONJUNTO DE PALAVRAS / MAIOR NÚMERO ENCONTRADO DE PALAVRAS SEMELHANTES NO CONJUNTO DE PALAVRAS
+    palavra = palavra.lower()
+    if df.empty:
+        return 0
+    contador = 0
+    for outra in df["Palavra"]:
+        outra = str(outra).lower()
+        if palavra == outra:
+            continue
+        if verificar_derivacao(palavra, outra):
+            contador += 1
+    max_sim = 0
+    for p in df["Palavra"]:
+        count = 0
+        for outra in df["Palavra"]:
+            if p != outra and verificar_derivacao(str(p).lower(), str(outra).lower()):
+                count += 1
+        if count > max_sim:
+            max_sim = count
+
+    if max_sim == 0:
+        return 0
+    
+    SO = contador / max_sim
+
+    return SO
+
+
+def frequencia_de_uso(palavra):
+    #F = FREQUÊNCIA PALAVRA (CORPUS BRASILEIRO) / (CORPUS BRASILEIRO) FREQUENCIA MAXIMA PRESENTE NA BASE DE PALAVRAS
+    palavra = palavra.lower()
+    if df.empty:
+        return 0
+    linha = df[df["Palavra"].str.lower() == palavra]
+    freq_palavra = linha["Frequência"].values[0]
+    frequencia_max = df["Frequência"].max()
+    if frequencia_max == 0:
+        return 0
+    F = freq_palavra / frequencia_max
+
+    return F
+
+def calculo_final(F, SO, CF, CS):
+    if df.empty:
+        return 0 
+    nivel = (0.15 * F) + (0.25 * CS) + (0.25 * CF) + (SO * 0.35)
+    return nivel
+
+def df_nivel(nivel, palavra):
+    if df.empty:
+        return "indefinido"
+    
+    if 0 <= nivel <= 0.5:
+        return "facil"
+    elif 0.51 <= nivel <= 0.75:
+        return "medio"
+    else: 
+        return "dificil"
+
 def encontrar_derivada(palavra): 
     doc_novo = nlp(palavra)
     maior_sim = 0
@@ -62,86 +154,28 @@ def encontrar_derivada(palavra):
         return palavra_base
     return None
 
-def adicionar_palavra(palavra):
+def processar_planilha():
     global df
-
-    if buscar_palavra(palavra):
+    if df.empty:
         return
 
-    tipo, original, derivada = analisar_palavra(palavra)
+    niveis = []
+    classificacoes = []
 
-    if tipo == "Original":
-        base = encontrar_derivada(palavra)
-        if base:
-            tipo = "Derivada"
-            original = base
-            derivada = palavra
+    for _, linha in df.iterrows():
 
-    novo_dado = pd.DataFrame([[palavra, tipo, original, derivada]], columns=df.columns)
-    df = pd.concat([df, novo_dado], ignore_index=True)
+        palavra = str(linha["Palavra"]).lower()
+        F = frequencia_de_uso(palavra)
+        CS = complexidade_silabica(palavra)
+        CF = complexidade_fonologica(palavra)
+        SO = similaridade_ortografica(palavra)
+        nivel = calculo_final(F, SO, CF, CS)
+
+        classificacao = df_nivel(nivel, palavra)
+        niveis.append(nivel)
+        classificacoes.append(classificacao)
+    df["Nível"] = niveis
+    df["Classificacao"] = classificacoes
     df.to_excel(ARQUIVO, index=False)
-    print(f"'{palavra}' adicionada como {tipo} (original: {original})")
 
-def listar_catalogo():
-    print("\nCatálogo atual:")
-    print(df)
-
-def excluir_palavra(palavra):
-    global df
-    df = df[df["Palavra"].str.lower() != palavra.lower()]
-    df.to_excel(ARQUIVO, index=False)
-    print(f"'{palavra}' removida do catálogo.")
-
-while True:
-    print("\n1 - adicionar nova palavra")
-    print("2 - ver lista de palavras")
-    print("3 - excluir palavra")
-    print("4 -  encontrar uma palavra")
-    print("5 - sair")
-    print("oh ")
-    print("6 - mudar de derivada para original")
-    print("7 - mudar de original para derivada")
-
-    opcao = input("Escolha uma opção: ").strip()
-    
-    if opcao == "1":
-        palavra = input("qual palavra? ").strip().lower()
-        adicionar_palavra(palavra)
-    elif opcao == "2":
-        listar_catalogo()
-    elif opcao == "3":
-        palavra = input("qual palavra deseja excluir?").strip().lower()
-        excluir_palavra(palavra)
-    elif opcao == "4":
-        palavra = input("qual palavra deseja encontrar?").strip().lower()
-        if encontrar_derivada(palavra) is None:
-            print("nenhuma palavra base encontrada")
-        else:
-            print(f"A palavra base encontrada é: {encontrar_derivada(palavra)} na posicao {df[df['Palavra'] == encontrar_derivada(palavra)].index[0]}")
-    elif opcao == "5":
-        break
-    elif opcao == "6":
-        palavra = input("qual palavra deseja mudar de derivada para original?").strip().lower()
-        if palavra in df["Palavra"].values:
-            df.loc[df["Palavra"] == palavra, "Tipo"] = "Original"
-            df.loc[df["Palavra"] == palavra, "Palavra original"] = palavra
-            df.loc[df["Palavra"] == palavra, "Palavra derivada"] = ""
-            df.to_excel(ARQUIVO, index=False)
-            print(f"'{palavra}' mudou para Original.")
-        else:
-            print("palavra não encontrada no catálogo.")
-    elif opcao == "7":
-        palavra = input("qual palavra deseja mudar de original para derivada?").strip().lower()
-        original = input("qual é a palavra original dessa derivada?").strip().lower()
-        if palavra in df["Palavra"].values:
-            df.loc[df["Palavra"] == palavra, "Tipo"] = "Derivada"
-            df.loc[df["Palavra"] == palavra, "Palavra derivada"] = palavra
-            df.loc[df["Palavra"] == palavra, "Palavra original"] = original
-            df.to_excel(ARQUIVO, index=False)
-            print(f"'{palavra}' mudou para Derivada de '{original}'.")
-        else:
-            print("palavra não encontrada no catálogo.")
-    else:           
-        print("opcap invalida")
-
-#coisas pra arrumar ainda: ordenar as palvras pela ordem alfabetica; diferenciar a original e derivação melhor, nn pela ordem que é inserido
+processar_planilha()
