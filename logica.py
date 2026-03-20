@@ -161,9 +161,7 @@ def processar_planilha():
 
     niveis = []
     classificacoes = []
-
     for _, linha in df.iterrows():
-
         palavra = str(linha["Palavra"]).lower()
         F = frequencia_de_uso(palavra)
         CS = complexidade_silabica(palavra)
