@@ -7,7 +7,7 @@ from collections import Counter
 
 nlp = spacy.load("pt_core_news_sm")
 BASE = os.path.dirname(os.path.abspath(__file__))
-ARQUIVO = os.path.join(BASE, "catalogo_palavras.xlsx")
+ARQUIVO = os.path.join(BASE, "catalogo_palavras_ATUALIZADO (2).xlsx")
 if os.path.exists(ARQUIVO):
     df = pd.read_excel(ARQUIVO)
     df.columns = ["Palavra", "Frequência", "Numero_de_silabas", "Derivações", "Fonemas", "Nível"]
