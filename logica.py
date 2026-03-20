@@ -53,10 +53,17 @@ def complexidade_silabica(palavra):
     #CS = NÚMERO DE SÍLABAS DA PALAVRA / MAIOR NÚMERO DE SÍLABAS NO CONJUNTO DE PALAVRAS ANALISADO
    palavra = palavra.lower()
    if df.empty:
+<<<<<<< HEAD
         return 0
    linha = df[df["Palavra"].str.lower() == palavra]
    silaba_palavra = linha["Numero_de_silabas"].values[0]
    maior_n_silaba = df["Numero_de_silabas"].max()
+=======
+        return 0;
+   linha = df[df["Palavra"].str.lower() == palavra]
+   silaba_palavra = linha["Silabas"].values[0]
+   maior_n_silaba = df["Slabas"].max()
+>>>>>>> b55b47868f58063eb1764eb686a31d86174bdf89
    if maior_n_silaba == 0:
         return 0
    CS = silaba_palavra / maior_n_silaba
@@ -67,10 +74,17 @@ def complexidade_fonologica(palavra):
     #CF = NÚMERO DE FONEMAS / MAIOR NÚMERO DE FONEMAS OBSERVADOS NO CONJUNTO DE PALAVRA
     palavra = palavra.lower()
     if df.empty:
+<<<<<<< HEAD
         return 0
     linha = df[df["Palavra"].str.lower() == palavra]
     fonema_palavra = linha["Fonemas"].values[0]
     maior_n_fonema = df["Fonemas"].max()
+=======
+        return 0;
+    linha = df[df["Palavra"].str.lower() == palavra]
+    fonema_palavra = linha["Fonema"].values[0]
+    maior_n_fonema = df["Fonema"].max()
+>>>>>>> b55b47868f58063eb1764eb686a31d86174bdf89
     if maior_n_fonema == 0:
         return 0
     CF = fonema_palavra / maior_n_fonema
@@ -78,6 +92,7 @@ def complexidade_fonologica(palavra):
     return CF
 
 
+<<<<<<< HEAD
 def similaridade_ortografica(palavra):
     #SO = NÚMERO DE PALAVRAS SEMELHANTES NO CONJUNTO DE PALAVRAS / MAIOR NÚMERO ENCONTRADO DE PALAVRAS SEMELHANTES NO CONJUNTO DE PALAVRAS
     palavra = palavra.lower()
@@ -105,6 +120,13 @@ def similaridade_ortografica(palavra):
     SO = contador / max_sim
 
     return SO
+=======
+def similaridade_ortografica(palavra, n_derivadas):
+    #SO = NÚMERO DE PALAVRAS SEMELHANTES NO CONJUNTO DE PALAVRAS / MAIOR NÚMERO ENCONTRADO DE PALAVRAS SEMELHANTES NO CONJUNTO DE PALAVRAS
+    palavra = palavra.lower()
+    if df.empty:
+        return 0;
+>>>>>>> b55b47868f58063eb1764eb686a31d86174bdf89
 
 
 def frequencia_de_uso(palavra):
@@ -121,6 +143,7 @@ def frequencia_de_uso(palavra):
 
     return F
 
+<<<<<<< HEAD
 def calculo_final(F, SO, CF, CS):
     if df.empty:
         return 0 
@@ -138,6 +161,8 @@ def df_nivel(nivel, palavra):
     else: 
         return "dificil"
 
+=======
+>>>>>>> b55b47868f58063eb1764eb686a31d86174bdf89
 def encontrar_derivada(palavra): 
     doc_novo = nlp(palavra)
     maior_sim = 0
@@ -153,6 +178,7 @@ def encontrar_derivada(palavra):
     if maior_sim > 0.75 and palavra_base:
         return palavra_base
     return None
+<<<<<<< HEAD
 
 def processar_planilha():
     global df
@@ -179,3 +205,5 @@ def processar_planilha():
     df.to_excel(ARQUIVO, index=False)
 
 processar_planilha()
+=======
+>>>>>>> b55b47868f58063eb1764eb686a31d86174bdf89
