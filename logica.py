@@ -9,10 +9,10 @@ nlp = spacy.load("pt_core_news_sm")
 BASE = os.path.dirname(os.path.abspath(__file__))
 ARQUIVO = os.path.join(BASE, "catalogo_palavras_ATUALIZADO (2).xlsx")
 if os.path.exists(ARQUIVO):
-    df = pd.read_excel(ARQUIVO, usecols="A:F")
-    df.columns = ["Palavra", "Frequência", "Numero_de_silabas", "Derivações", "Fonemas", "Nível"]
+    df = pd.read_excel(ARQUIVO, usecols="A:G")
+    df.columns = ["Palavra", "Frequência", "Numero_de_silabas", "Derivações", "Fonemas", "Nível", "Classificação"]
 else:
-    df = pd.DataFrame(columns=["Palavra", "Frequência", "Numero_de_silabas", "Derivações", "Fonemas", "Nível"])
+    df = pd.DataFrame(columns=["Palavra", "Frequência", "Numero_de_silabas", "Derivações", "Fonemas", "Nível", "Classificação"])
 
 def buscar_palavra(palavra):
     resultado = df[df["Palavra"].str.lower() == palavra.lower()]
@@ -173,7 +173,7 @@ def processar_planilha():
         niveis.append(nivel)
         classificacoes.append(classificacao)
     df["Nível"] = niveis
-    df["classificação"] =  classificacao #observar aqui 
+    df["Classificação"] =  classificacao #observar aqui 
     df.to_excel(ARQUIVO, index=False)
 
 processar_planilha()
