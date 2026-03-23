@@ -2,7 +2,7 @@
 
 Este projeto tem como objetivo desenvolver um algoritmo em Python capaz de classificar palavras da língua portuguesa de acordo com seu nível de dificuldade, com base em métricas linguísticas.
 
-A proposta está vinculada a um projeto de Iniciação Científica da Universidade Católica de Pernambuco (UNICAP).
+A proposta está vinculada a um projeto de Iniciação Científica da Universidade Católica de Pernambuco (UNICAP). Construído pela aluna Quezia Costa, futura cientista da computação. 
 
 ---
 

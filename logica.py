@@ -7,12 +7,12 @@ from collections import Counter
 
 nlp = spacy.load("pt_core_news_sm")
 BASE = os.path.dirname(os.path.abspath(__file__))
-ARQUIVO = os.path.join(BASE, "catalogo_palavras_ATUALIZADO (2).xlsx")
+ARQUIVO = os.path.join(BASE, "catalogo_palavras_ATUALIZADO (3).xlsx")
 if os.path.exists(ARQUIVO):
-    df = pd.read_excel(ARQUIVO, usecols="A:G")
-    df.columns = ["Palavra", "Frequência", "Numero_de_silabas", "Derivações", "Fonemas", "Nível", "Classificação"]
+    df = pd.read_excel(ARQUIVO, usecols="A:F")
+    df.columns = ["Palavra", "Frequência", "Numero_de_silabas", "Derivações", "Nível", "Classificação"]
 else:
-    df = pd.DataFrame(columns=["Palavra", "Frequência", "Numero_de_silabas", "Derivações", "Fonemas", "Nível", "Classificação"])
+    df = pd.DataFrame(columns=["Palavra", "Frequência", "Numero_de_silabas",  "Nível", "Classificação"])
 
 def buscar_palavra(palavra):
     resultado = df[df["Palavra"].str.lower() == palavra.lower()]
@@ -64,20 +64,6 @@ def complexidade_silabica(palavra):
 
    return CS
 
-def complexidade_fonologica(palavra):
-    #CF = NÚMERO DE FONEMAS / MAIOR NÚMERO DE FONEMAS OBSERVADOS NO CONJUNTO DE PALAVRA
-    palavra = palavra.lower()
-    if df.empty:
-        return 0
-    linha = df[df["Palavra"].str.lower() == palavra]
-    fonema_palavra = linha["Fonemas"].values[0]
-    maior_n_fonema = df["Fonemas"].max()
-    if maior_n_fonema == 0:
-        return 0
-    CF = fonema_palavra / maior_n_fonema
-
-    return CF
-
 def similaridade_ortografica(palavra):
     #SO = NÚMERO DE PALAVRAS SEMELHANTES NO CONJUNTO DE PALAVRAS / MAIOR NÚMERO ENCONTRADO DE PALAVRAS SEMELHANTES NO CONJUNTO DE PALAVRAS
     palavra = palavra.lower()
@@ -125,7 +111,6 @@ def encontrar_derivada(palavra):
     doc_novo = nlp(palavra)
     maior_sim = 0
     palavra_base = None
-
     for existente in df["Palavra"]:
         doc_existente = nlp(str(existente))
         sim = doc_novo.similarity(doc_existente)
@@ -140,19 +125,21 @@ def encontrar_derivada(palavra):
 def calculo_final(F, SO, CF, CS):
     if df.empty:
         return 0 
-    nivel = (0.15 * F) + (0.25 * CS) + (0.25 * CF) + (SO * 0.35)
+    nivel = (0.20 * F) + (0.35 * CS) + (SO * 0.45)
     return nivel
 
 def df_nivel(nivel, palavra):
     if df.empty:
         return "indefinido"
     
-    if 0 <= nivel <= 0.5:
+    if 0 <= nivel <= 0.4:
         return "facil"
-    elif 0.51 <= nivel <= 0.75:
+    elif 0.41 <= nivel <= 0.65:
         return "medio"
-    else: 
+    elif 0.66 <=  nivel <= 1:
         return "dificil"
+    else: 
+        return "inconclusivo"
 
 def processar_planilha():
     global df
@@ -165,7 +152,6 @@ def processar_planilha():
         palavra = str(linha["Palavra"]).lower()
         F = frequencia_de_uso(palavra)
         CS = complexidade_silabica(palavra)
-        CF = complexidade_fonologica(palavra)
         SO = similaridade_ortografica(palavra)
         nivel = calculo_final(F, SO, CF, CS)
 
