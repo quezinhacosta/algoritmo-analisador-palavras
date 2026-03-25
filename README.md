@@ -8,11 +8,10 @@ A proposta está vinculada a um projeto de Iniciação Científica da Universida
 
 ##  Objetivo
 
-Criar um sistema que analisa palavras e atribui um índice de dificuldade com base em quatro critérios:
+Criar um sistema que analisa palavras e atribui um índice de dificuldade com base em três critérios:
 
 - Frequência de uso
 - Complexidade silábica
-- Complexidade fonológica
 - Similaridade ortográfica
 
 ---
@@ -40,15 +39,9 @@ CF = número de fonemas / maior número de fonemas do conjunto
 
 ---
 
-### 🔹 Similaridade Ortográfica (SO)
-
-SO = número de palavras semelhantes / maior número de similaridades no conjunto
-
----
-
 ### Cálculo Final
 
-C = 0.15F + 0.25CS + 0.25CF + 0.35SO
+C = 0.20F + 0.40CS + 0.40SO
 
 ---
 
@@ -70,15 +63,13 @@ Os dados são armazenados em um arquivo Excel com as seguintes colunas:
 | Frequência          | Frequência de uso |
 | Numero_de_silabas   | Número de sílabas |
 | Derivações          | Relação com outras palavras |
-| Fonemas             | Número de fonemas |
-| Nível               | Classificação final |
+| Nível               | Valor numerico |
+| Classificação       | Classificação final |
 
 ---
 
 ## ▶️ Como executar
 
-1. Instale as dependências:
-
-```bash
-pip install pandas spacy openpyxl
-python -m spacy download pt_core_news_sm
+pip install pandas spacy openpyxl (verificar se já estão baixadas antes, com pip show)
+python -m spacy download pt_core_news_sm (verificar se já está baixado)
+python logica.py
