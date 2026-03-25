@@ -5,30 +5,18 @@ import os
 nlp = spacy.load("pt_core_news_sm")
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-ARQUIVO = os.path.join(BASE, "catalogo_palavras_ATUALIZADO (5).xlsx")
+ARQUIVO = os.path.join(BASE, "catalogo_palavras_ATUALIZADO (6).xlsx")
 
-# =========================
-# CARREGAR BASE
-# =========================
 if os.path.exists(ARQUIVO):
     df = pd.read_excel(ARQUIVO, usecols="A:F")
     df.columns = ["Palavra", "Frequência", "Numero_de_silabas", "Derivações", "Nível", "Classificação"]
 else:
     df = pd.DataFrame(columns=["Palavra", "Frequência", "Numero_de_silabas", "Derivações", "Nível", "Classificação"])
 
-
-# =========================
-# FUNÇÕES AUXILIARES
-# =========================
-
 def buscar_linha(palavra):
     linha = df[df["Palavra"].str.lower() == palavra.lower()]
     return linha
 
-
-# =========================
-# FREQUÊNCIA
-# =========================
 def frequencia_de_uso(palavra):
     if df.empty:
         return 0
@@ -42,13 +30,12 @@ def frequencia_de_uso(palavra):
 
     if freq_max == 0:
         return 0
+    
+    F = freq_palavra / freq_max
 
-    return freq_palavra / freq_max
+    return F
 
 
-# =========================
-# COMPLEXIDADE SILÁBICA
-# =========================
 def complexidade_silabica(palavra):
     if df.empty:
         return 0
@@ -63,24 +50,9 @@ def complexidade_silabica(palavra):
     if max_silabas == 0:
         return 0
 
-    return silabas / max_silabas
+    CS = silabas / max_silabas
 
-
-# =========================
-# SIMILARIDADE ORTOGRÁFICA (VIZINHOS REAIS)
-# =========================
-def palavras_semelhantes(p1, p2):
-    if p1 == p2:
-        return False
-
-    # diferença de caracteres (tipo Levenshtein simplificado)
-    diferencas = abs(len(p1) - len(p2))
-
-    for a, b in zip(p1, p2):
-        if a != b:
-            diferencas += 1
-
-    return diferencas <= 1  # apenas 1 mudança
+    return CS
 
 
 def similaridade_ortografica(palavra):
@@ -99,7 +71,10 @@ def similaridade_ortografica(palavra):
  
 
 def calculo_final(F, SO, CS):
-    return (0.20 * F) + (0.35 * CS) + (0.45 * SO)
+    if SO == 0:
+        return (0.30 * F) + (0.70 * CS)
+    else:
+        return (0.20 * F) + (0.40 * CS) + (0.40 * SO)
 
 
 def classificar(nivel):
